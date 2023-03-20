@@ -13,10 +13,13 @@ exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const app_service_1 = require("./app.service");
 let AppController = class AppController {
+    welcome() {
+        throw new Error('Method not implemented.');
+    }
     constructor(appService) {
         this.appService = appService;
     }
-    getHello() {
+    welcomeToChequa() {
         return this.appService.welcome();
     }
 };
@@ -25,7 +28,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", String)
-], AppController.prototype, "getHello", null);
+], AppController.prototype, "welcomeToChequa", null);
 AppController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [app_service_1.AppService])

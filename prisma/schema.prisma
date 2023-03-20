@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Profile {
+  id           String    @id @unique @default(uuid())
+  address      String
+  phoneNumber  Int
+  nextOfKin    String
+  dob          DateTime?
+  verified     Boolean?
+  profileImage Bytes?
+  
+}
+
+model User {
+  id              String   @id @unique @default(uuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  email           String @unique
+  password            String
+  refreshToken    String?
+  createdTicket   Ticket[] @relation(name: "Initiator")
+  createdId       String?
+  recievingTicket Ticket[] @relation(name: "Receiver")
+
+}
+
+model Ticket {
+  id          String   @id @unique @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  description String
+
+  userId     String?
+  initiator  User?   @relation("Initiator", fields: [userId], references: [id])
+  receiverId String?
+  receiver   User?   @relation("Receiver", fields: [receiverId], references: [id])
+ 
+}
+//  2258081413 uba. 

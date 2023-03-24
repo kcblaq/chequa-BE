@@ -11,7 +11,7 @@ export class AccessToken extends PassportStrategy(Strategy, 'jwt') {
 					secretOrKey: config.get('A_TOKEN_SECRET'),
 				});
     }
-    validate(payload) {
+    validate(payload: any) {
         return payload
     }
 }

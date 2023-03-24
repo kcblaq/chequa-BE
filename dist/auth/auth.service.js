@@ -23,8 +23,7 @@ let AuthService = class AuthService {
     }
     async signUp(dto) {
         const hashedpswd = await argon.hash(dto.password);
-        const newuser = await this.prisma.user
-            .create({
+        const newuser = await this.prisma.user.create({
             data: {
                 email: dto.email,
                 password: hashedpswd,
@@ -34,11 +33,55 @@ let AuthService = class AuthService {
         await this.updateRtHash(newuser.id, tokens.refresh_token);
         return tokens;
     }
-    login() { }
-    logout() { }
-    refresh() { }
+    async login(dto) {
+        const loginuser = await this.prisma.user.findUnique({
+            where: {
+                email: dto.email
+            }
+        });
+        if (!loginuser)
+            throw new common_1.HttpException("Access denied", common_1.HttpStatus.FORBIDDEN);
+        try {
+            const matched = await argon.verify(loginuser.password, dto.password);
+            if (!matched) {
+                throw new common_1.ForbiddenException("Access denied");
+            }
+        }
+        catch (error) {
+            throw error;
+        }
+        const tokens = await this.tokenGenerator(loginuser.id, loginuser.email);
+        await this.updateRtHash(loginuser.id, tokens.refresh_token);
+        return tokens;
+    }
+    async logout(id) {
+        await this.prisma.user.update({
+            where: {
+                id: id,
+            },
+            data: {
+                refreshToken: null
+            }
+        });
+    }
+    async refresh(userid, rt) {
+        const user = await this.prisma.user.findUnique({
+            where: {
+                id: userid
+            }
+        });
+        if (!user)
+            throw new common_1.ForbiddenException("Access denied ");
+        const rtmatch = await argon.verify(user.refreshToken, rt);
+        if (!rtmatch)
+            throw new common_1.ForbiddenException("Access denied, cannot generate new access token");
+        const token = await this.tokenGenerator(user.id, user.email);
+        await this.updateRtHash(user.id, token.refresh_token);
+        return token;
+    }
     async updateRtHash(id, rt) {
-        const hashedtoken = await this.hashy(rt);
+        const hashedtoken = await argon.hash(rt);
+        console.log(hashedtoken);
         await this.prisma.user.update({
             where: {
                 id: id
@@ -54,7 +97,7 @@ let AuthService = class AuthService {
     async tokenGenerator(id, email) {
         const [refresh, access] = await Promise.all([
             this.jwt.signAsync({
-                id,
+                sub: id,
                 email,
             }, {
                 secret: this.config.get('R_TOKEN_SECRET'),

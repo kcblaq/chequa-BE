@@ -16,6 +16,7 @@ exports.AuthController = void 0;
 const auth_dto_1 = require("./dto/auth.dto");
 const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
+const passport_1 = require("@nestjs/passport");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -23,9 +24,19 @@ let AuthController = class AuthController {
     signUp(dto) {
         return this.authService.signUp(dto);
     }
-    login() { }
-    logout() { }
-    refresh() { }
+    login(dto) {
+        return this.authService.login(dto);
+    }
+    logout(req) {
+        const userid = req.user;
+        console.log(userid);
+        return this.authService.logout(userid['id']);
+    }
+    refresh(req) {
+        const userdetail = req.user;
+        console.log(userdetail);
+        return this.authService.refresh(userdetail['sub'], userdetail['r_token']);
+    }
 };
 __decorate([
     (0, common_1.Post)('signup'),
@@ -36,20 +47,27 @@ __decorate([
 ], AuthController.prototype, "signUp", null);
 __decorate([
     (0, common_1.Post)('login'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [auth_dto_1.AuthDto]),
+    __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Post)('logout'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "logout", null);
 __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt-refresh')),
     (0, common_1.Post)('refresh'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "refresh", null);
 AuthController = __decorate([

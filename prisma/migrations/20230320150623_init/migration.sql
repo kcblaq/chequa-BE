@@ -1,21 +1,15 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "Profile" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "phoneNumber" INTEGER NOT NULL,
+    "nextOfKin" TEXT NOT NULL,
+    "dob" TIMESTAMP(3),
+    "verified" BOOLEAN,
+    "profileImage" BYTEA,
 
-  - You are about to drop the `tickets` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "tickets" DROP CONSTRAINT "tickets_receiverId_fkey";
-
--- DropForeignKey
-ALTER TABLE "tickets" DROP CONSTRAINT "tickets_userId_fkey";
-
--- DropTable
-DROP TABLE "tickets";
-
--- DropTable
-DROP TABLE "users";
+    CONSTRAINT "Profile_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -42,6 +36,9 @@ CREATE TABLE "Ticket" (
 
     CONSTRAINT "Ticket_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Profile_id_key" ON "Profile"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_id_key" ON "User"("id");

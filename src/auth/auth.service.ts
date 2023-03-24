@@ -3,7 +3,7 @@ import { AccessToken } from './../strategy/access_token';
 import { ConfigService } from '@nestjs/config';
 import { AuthDto } from './dto/auth.dto';
 import { PrismaconService } from './../prismacon/prismacon.service';
-import {  Injectable } from '@nestjs/common';
+import {  ForbiddenException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as argon from 'argon2'
 import { Token } from './types';
 import { JwtService } from '@nestjs/jwt';
@@ -17,11 +17,7 @@ export class AuthService {
 
     async signUp(dto: AuthDto):Promise<Token> {
         const hashedpswd = await argon.hash(dto.password)
-		
-		// const test = await this.prisma.user;
-		// console.log('test: ' + test)
-		const newuser = await this.prisma.user
-			.create({
+		const newuser = await this.prisma.user.create({
 				data: {
 					email: dto.email,
 					password: hashedpswd,
@@ -30,19 +26,61 @@ export class AuthService {
 		const tokens = await this.tokenGenerator(newuser.id, newuser.email)
 		await this.updateRtHash(newuser.id, tokens.refresh_token)
         return tokens;
+		
     }
 
-	login() {}
+	async login(dto: AuthDto): Promise<Token> {
+		const loginuser = await this.prisma.user.findUnique({
+			where :{
+				email: dto.email
+			}
+		})
+		if (!loginuser) throw new HttpException("Access denied", HttpStatus.FORBIDDEN);
+		
+		try {
+			const matched = await argon.verify(loginuser.password, dto.password);
+			if (!matched) { throw new ForbiddenException("Access denied") }
+		} catch (error) { 
+			throw error;
+		}
+
+		const tokens = await this.tokenGenerator(loginuser.id, loginuser.email)
+		await this.updateRtHash(loginuser.id, tokens.refresh_token)
+		return tokens;
+	}
 
 	
-	logout() {}
+	async logout(id: string) {
+		await this.prisma.user.update({
+			where: {
+				id: id,
+			},
+			data: {
+				refreshToken: null
+			}
+		})
+	}
 
-	refresh() { }
+	async refresh(userid:string, rt:string): Promise<Token> {
+		const user = await this.prisma.user.findUnique({
+			where: {
+				id: userid
+			}
+		}) 
+		if (!user) throw new ForbiddenException("Access denied ")
+		const rtmatch = await argon.verify(user.refreshToken, rt)
+		if (!rtmatch) throw new ForbiddenException("Access denied, cannot generate new access token")
+		const token = await this.tokenGenerator(user.id, user.email)
+		await this.updateRtHash(user.id, token.refresh_token);
+		return token;
+	
+	}
 
 
 
 	async updateRtHash(id:string, rt:string) {
-		const hashedtoken = await this.hashy(rt)
+		const hashedtoken = await argon.hash(rt)
+		console.log(hashedtoken)
 		await this.prisma.user.update({
 			where: {
 				id: id
@@ -66,7 +104,7 @@ export class AuthService {
         const [refresh, access] = await Promise.all([
 					this.jwt.signAsync(
 						{
-							id,
+							sub: id,
 							email,
 						},
 						{

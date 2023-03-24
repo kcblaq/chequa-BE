@@ -23,7 +23,8 @@ let RefreshToken = class RefreshToken extends (0, passport_1.PassportStrategy)(p
         });
     }
     validate(req, payload) {
-        const r_token = req.get('authorization').replace('Bearer', '').trim();
+        var _a;
+        const r_token = (_a = req === null || req === void 0 ? void 0 : req.get('authorization')) === null || _a === void 0 ? void 0 : _a.replace('Bearer', '').trim();
         return Object.assign(Object.assign({}, payload), { r_token });
     }
 };

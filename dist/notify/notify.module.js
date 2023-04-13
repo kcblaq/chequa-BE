@@ -6,21 +6,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppModule = void 0;
+exports.NotifyModule = void 0;
 const common_1 = require("@nestjs/common");
-const app_controller_1 = require("./app.controller");
-const app_service_1 = require("./app.service");
-const auth_module_1 = require("./auth/auth.module");
-const prismacon_module_1 = require("./prismacon/prismacon.module");
-const notify_module_1 = require("./notify/notify.module");
-let AppModule = class AppModule {
+const notify_controller_1 = require("./notify.controller");
+const notify_service_1 = require("./notify.service");
+const dto_1 = require("./dto");
+let NotifyModule = class NotifyModule {
 };
-AppModule = __decorate([
+NotifyModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, prismacon_module_1.PrismaconModule, notify_module_1.NotifyModule],
-        controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        controllers: [notify_controller_1.NotifyController],
+        providers: [notify_service_1.NotifyService, dto_1.Dtonotify]
     })
-], AppModule);
-exports.AppModule = AppModule;
-//# sourceMappingURL=app.module.js.map
+], NotifyModule);
+exports.NotifyModule = NotifyModule;
+//# sourceMappingURL=notify.module.js.map

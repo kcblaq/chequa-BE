@@ -6,6 +6,10 @@ const app_module_1 = require("./app.module");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.useGlobalPipes(new common_1.ValidationPipe());
+    app.enableCors({
+        origin: 'http://127.0.0.1:5173',
+        credentials: true
+    });
     await app.listen(3000);
 }
 bootstrap();

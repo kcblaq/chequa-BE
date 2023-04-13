@@ -48,4 +48,7 @@ model Ticket {
   receiver   User?   @relation("Receiver", fields: [receiverId], references: [id])
  
 }
-//  2258081413 uba. 
+model Notify {
+  id String @id @ unique @default(uuid())
+  email String @unique
+}

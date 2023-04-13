@@ -1,6 +1,7 @@
+import { GetUser } from './utils/decorators/get-user.decorator';
 import { RefreshToken } from './../strategy/refresh_token';
 import { AuthDto } from './dto/auth.dto';
-import { Body, Controller, HttpCode, Post, Req, UseGuards, HttpStatus } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Req, UseGuards, HttpStatus, Header } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Token } from './types';
 import { AuthGuard } from '@nestjs/passport';
@@ -17,6 +18,7 @@ export class AuthController {
     }
 
     @Post('login')
+        // @Header()
     login(@Body() dto: AuthDto): Promise<Token> { 
         return this.authService.login(dto)
     }
